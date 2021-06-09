@@ -30,6 +30,12 @@ def tournament_simulator(phases: Phases):
     for group in groups.groups: 
         group.determine_winners()
 
+    print("Group winners")
+    for group in groups.groups:
+        print(group.name + ": " + group.first.name)
+    print("=====================")
+    print("")
+
     groups.determine_thirds()
     print("=====================")
 

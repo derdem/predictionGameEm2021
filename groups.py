@@ -22,36 +22,42 @@ class Group:
         # print(list(map(lambda d: "Name: " + d.name + " Points: " + str(d.points) + " Goals: " + str(d.goals), sorted_members)))
 
 class GroupA(Group):
+    name = "Group A"
     member1 = Teams.italy
     member2 = Teams.switzerland
     member3 = Teams.turkey
     member4 = Teams.wales
 
 class GroupB(Group):
+    name = "Group B"
     member1 = Teams.belgium
     member2 = Teams.denmark
     member3 = Teams.finland
     member4 = Teams.russia
 
 class GroupC(Group):
+    name = "Group C"
     member1 = Teams.netherlands
     member2 = Teams.northmazedonia
     member3 = Teams.ukraine
     member4 = Teams.austria
 
 class GroupD(Group):
+    name = "Group D"
     member1 = Teams.england
     member2 = Teams.kroatia
     member3 = Teams.scotland
     member4 = Teams.czechrepublic
 
 class GroupE(Group):
+    name = "Group E"
     member1 = Teams.poland
     member2 = Teams.sweden
     member3 = Teams.slowakia
     member4 = Teams.spain
 
 class GroupF(Group):
+    name = "Group F"
     member1 = Teams.germany
     member2 = Teams.france
     member3 = Teams.portugal
