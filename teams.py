@@ -49,3 +49,30 @@ class Teams:
     portugal = Country("Portugal", 3)
     hungry = Country("Hungry", 1)
 
+    all_teams = [
+        italy, 
+        switzerland, 
+        turkey, 
+        wales, 
+        belgium, 
+        denmark, 
+        finland, 
+        russia, 
+        netherlands, 
+        northmazedonia, 
+        ukraine, 
+        austria, 
+        england, 
+        kroatia, 
+        scotland,
+        czechrepublic,
+        poland,
+        sweden,
+        slowakia,
+        spain,
+        germany,
+        france,
+        portugal,
+        hungry
+    ]
+

@@ -1,6 +1,6 @@
-from spieltage import spieltage
+from spieltage import Phases
 from teams import Country
-from randomResult import random_result
+from randomResult import random_result, random_between_0_and_5
 import random
 from teams import Teams
 from groups import groups
@@ -15,25 +15,49 @@ class OutcomeProbability:
         self.team2_probability = probability2
         self.remis_probability = 1 - probability1 - probability2
 
-def spieltage_simulator(spieltage):
+def tournament_simulator(phases: Phases):
+    spieltage = phases.spieltage
+    ko_rounds = phases.ko_rounds
+
+    # Group rounds
     for index in range(len(spieltage)):
         print("Tag " + str(index + 1))
-        for match in spieltage[index]:
-            play_match(match[0], match[1])
+        for teams in spieltage[index]:
+            play_group_match(teams[0], teams[1])
         print("=====================")
         print("")
 
-    """ country_codes = props(Teams)
-    for country_code in country_codes:
-        print("Country: " + country_code)
-        print("Points: " + str(getattr(Teams, country_code).points))
-        print("Goals: " + str(getattr(Teams, country_code).goals))
-        print("") """
-    for group in groups: 
-        group.determine_winners(group)
+    for group in groups.groups: 
+        group.determine_winners()
+
+    groups.determine_thirds()
+    print("=====================")
+
+    # Ko phase
+    teams_for_next_phase = groups
+    
+    for ko_round_class in ko_rounds:
+        ko_round = ko_round_class(teams_for_next_phase)
+        spieltage = ko_round.set_spieltage()
+        print("")
+        print(ko_round.name)
+        for teams in spieltage:
+            winner = play_ko_match(teams[0], teams[1])
+            ko_round.add_winner(winner)
+        
+        teams_for_next_phase = ko_round.winners
+
+    print("")
+    print("Country results")
+    for country in Teams.all_teams:
+        print("    " + country.name + ": " + str(country.goals) + " goals")
+    print("=====================")
+    
+    print("")
+    print("Winner: " + list(map(lambda x: x.name, teams_for_next_phase))[0])        
 
 
-def play_match(team1: Country, team2: Country):
+def play_group_match(team1: Country, team2: Country):
     team1_strength = team1.strength
     team2_strength = team2.strength
     outcome_chances = assign_probabilities(team1_strength, team2_strength)
@@ -52,8 +76,39 @@ def play_match(team1: Country, team2: Country):
         [team2_score, team1_score] = set_score()
         team1.set_goals_and_points(team1_score, -1)
         team2.set_goals_and_points(team2_score, 1)
-    print(team1.name + " vs. " + team2.name + ": " + str(team1_score) + " : " + str(team2_score))
+    print("    " + team1.name + " vs. " + team2.name + ": " + str(team1_score) + " : " + str(team2_score))
 
+def play_ko_match(team1: Country, team2: Country):
+    team1_strength = team1.strength
+    team2_strength = team2.strength
+    outcome_chances = assign_probabilities(team1_strength, team2_strength)
+    winnercode = determine_winner(outcome_chances)
+    team1_score = None
+    team2_score = None
+    if winnercode == 0:
+        [team1_score, team2_score] = set_remis_score()
+        [team1_penalty_score, team2_penalty_score] = play_penalty(0, 0)
+        team1_total_score = team1_score + team1_penalty_score
+        team2_total_score = team2_score + team2_penalty_score
+        team1.set_goals_and_points(team1_total_score, 0)
+        team2.set_goals_and_points(team2_total_score, 0)
+        print("    " + team1.name + " vs. " + team2.name + ": " + str(team1_score) + " : " + str(team2_score) + " (" + str(team1_total_score) + ":" + str(team2_total_score) + ")")
+        if team1_total_score > team2_total_score:
+            return team1
+        else:
+            return team2        
+    elif winnercode == 1:
+        [team1_score, team2_score] = set_score()
+        team1.set_goals_and_points(team1_score, 0)
+        team2.set_goals_and_points(team2_score, 0)
+        print("    " + team1.name + " vs. " + team2.name + ": " + str(team1_score) + " : " + str(team2_score))
+        return team1
+    elif winnercode == 2:
+        [team2_score, team1_score] = set_score()
+        team1.set_goals_and_points(team1_score, 0)
+        team2.set_goals_and_points(team2_score, 0)
+        print("    " + team1.name + " vs. " + team2.name + ": " + str(team1_score) + " : " + str(team2_score))
+        return team2
 
 def assign_probabilities(team1_strength: int, team2_strength: int) -> OutcomeProbability:
     probability1, probability2 = convert_strength_to_probabilities(team1_strength, team2_strength)
@@ -92,11 +147,17 @@ def set_remis_score():
     end_score = random_result()
     return end_score, end_score
 
-def log_result(team1: Country, team2: Country):
-    pass
+def play_penalty(team1_goals: int, team2_goals: int):
+    team1_goals = random_between_0_and_5()
+    team2_goals = random_between_0_and_5()
+    if team1_goals == team2_goals:
+        return play_penalty(team1_goals, team2_goals)
+    else:
+        return team1_goals, team2_goals
 
-def props(cls):   
-  return [i for i in cls.__dict__.keys() if i[:1] != '_']
+
+
+
 
 if __name__ == "__main__":
-    spieltage_simulator(spieltage)
+    tournament_simulator(Phases)
